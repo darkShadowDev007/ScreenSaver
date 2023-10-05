@@ -1,0 +1,135 @@
+<html lang="en"><head><script src="chrome-extension://bigfgeehfoenaimkoohnokeeideaomnd/mocky.prod.js"></script>
+  <meta charset="UTF-8">
+  <title>Screensaver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript" src="https://starzplay-prod-ssl.akamaized.net/prd-peg-data/default/screensaver/config1.js"></script>
+<style type="text/css">
+  body,
+  html {
+    background-color: black;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+  #info {
+    z-index: 50;
+    position: absolute;
+    background: black;
+    color: white;
+  }
+  #one,
+  #two {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    animation-timing-function: ease-in-out;
+  }
+  #two.visible {
+    opacity: 1;
+  }
+  #two {
+    opacity: 0;
+    z-index: 5;
+    transition: opacity ease;
+    transition-duration: 2s;
+  }
+
+  @keyframes moveRight {
+    from {
+      transform: translateX(4%) scale(1.1);
+    }
+    to {
+      transform: translateX(-4%) scale(1.1);
+    }
+  }
+  @keyframes moveLeft {
+    from {
+      transform: translateX(-4%) scale(1.1);
+    }
+    to {
+      transform: translateX(4%) scale(1.1);
+    }
+  }
+</style></head>
+<body class="hiddenTitles">
+<p id="info"></p>
+  <div id="one">
+    <img src="extraImages/10.jpg" alt="banner image" style="animation-name: moveRight; animation-duration: 13000ms;">
+  </div>
+  <div id="two" class="" style="transition-duration: 3000ms;">
+    <img src="extraImages/9.jpg" alt="banner image" style="animation-name: moveLeft; animation-duration: 13000ms;">
+  </div>
+<script>
+  var videoList = [];
+  var one = document.getElementById("one");
+  var two = document.getElementById("two");
+  var lastVideIndex = 0;
+  var animationIndex = 0;
+  function initialize() {
+    two.style.transitionDuration = config.transitionDuration + "ms";
+    if (!config.showTitle) document.body.classList.add("hiddenTitles");
+    startSlideShow();
+  }
+  function startSlideShow() {
+    readAdditionalImages();
+    if (videoList.length > 0) {
+      putRandomImageUrl(two);
+      swapImageAndChangeSrc();
+      setInterval(function () {
+        swapImageAndChangeSrc();
+      }, config.imageInterval);
+    } else {
+      document.getElementById("info").innerText +=
+        "\nYou didn't provide any images or something went wrong";
+      console.log("You didn't provide any images or something went wrong");
+    }
+  }
+  function swapImageAndChangeSrc() {
+    two.classList.toggle("visible");
+    var twoActive = two.classList.contains("visible");
+    var newInactive = twoActive ? one : two;
+    var newActive = twoActive ? two : one;
+    var newAnimationName = "none";
+    if (config.animations.length > 0) {
+      newAnimationName = config.animations[animationIndex];
+      animationIndex++;
+      if (config.animations.length == animationIndex) animationIndex = 0;
+      // console.log("Animations: " + animationIndex);
+    }
+    newActive.getElementsByTagName("img")[0].style.animationName = newAnimationName;
+    newActive.getElementsByTagName("img")[0].style.animationDuration =
+      config.imageInterval + config.transitionDuration + "ms";
+    setTimeout(function () {
+      putRandomImageUrl(newInactive);
+    }, config.imageInterval / 2);
+  }
+  function putRandomImageUrl(containerDiv) {
+    if (videoList.length == lastVideIndex) {
+      lastVideIndex = 0;
+    }
+    var item = videoList[lastVideIndex];
+    lastVideIndex++;
+    containerDiv.getElementsByTagName("img")[0].src = item.art;
+    containerDiv.getElementsByTagName("img")[0].style.animation = "";
+  }
+  function readAdditionalImages() {
+    // console.log("Using " + config.extraImages.length + " additional local artworks");
+    for (var i = 0; i < config.extraImages.length; i++) {
+      var video = {};
+      video.art = "https://starzplay-prod-ssl.akamaized.net/prd-peg-data/default/screensaver/extraImages/" + config.extraImages[i][1];
+      videoList.push(video);
+    }
+  }
+  initialize();
+</script>
+</body></html>
